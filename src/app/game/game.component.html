@@ -28,16 +28,17 @@
   <!--</div>-->
 <br/>
   <!--<div *ngIf="player.length">-->
-    <button [disabled]="player.busted" (click)="hit(player)">Hit</button>
-    <button [disabled]="player.busted" (click)="stay(player)">Stay</button>
-    <button [disabled]="player[0].value != player[1].value" (click)="split(player)">Split</button>
+    <button [disabled]="player.busted || !player.isUp" (click)="hit(player)">Hit</button>
+    <button [disabled]="player.busted || !player.isUp" (click)="stay(player)">Stay</button>
+    <button [hidden]="player[0].value != player[1].value || player.busted || !player.isUp" (click)="split(player)">Split</button>
+    <div *ngIf="gameOver">
+      {{player.winner}}
+    </div>
   </div>
+  <br/>
 </div>
 
-<br/>
-
 <div *ngIf="gameOver">
-  {{winner}}<br/>
   <button (click)="redeal()">Play Again</button>
 </div>
 

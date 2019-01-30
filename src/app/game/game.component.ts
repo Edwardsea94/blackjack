@@ -7,17 +7,28 @@ import {Card} from "../card";
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css']
 })
+
 export class GameComponent implements OnInit {
+
   deck: Card[];
   dealerHand: Card[] = [];
   playerHand: Card[] = [];
   players = Array(this.playerHand);
-  // busted = false;
   gameOver = false;
   playerTotal = 0;
   dealerTotal = 0;
-  winner = "";
+
   constructor(private shoe: ShoeService) { }
+
+  findNext() {
+    for (let i = 0; i < this.players.length - 1; i++) {
+      if(this.players[i].isUp == true) {
+        this.players[i].isUp = false;
+        this.players[i + 1].isUp = true;
+        break;
+      }
+    }
+  }
 
   split(player) {
     let secondHand: Card[] = [];
@@ -28,6 +39,7 @@ export class GameComponent implements OnInit {
     player.playerTotal = player[0].value + player[1].value;
     this.players[this.players.length - 1].playerTotal = secondHand[0].value + secondHand[1].value;
     this.players[this.players.length - 1].busted = false;
+    this.players[this.players.length - 1].isUp = false;
   }
 
   shuffle() {
@@ -51,10 +63,11 @@ export class GameComponent implements OnInit {
   updateTotals() {
     this.dealerTotal = this.dealerHand[1].value;
     this.players[0].playerTotal = this.players[0][0].value + this.players[0][1].value;
+    this.players[0].isUp = true;
     if (this.players[0].playerTotal == 21) {
-      // this.busted = true;
       this.players[0].busted = true;
-      this.winner = "Player Wins";
+      this.players[0].isUp = false;
+      this.players[0].winner = "Player Wins";
       this.gameOver = true;
       this.dealerTotal = 0;
       for (let i = 0; i < this.dealerHand.length; i++) {
@@ -81,6 +94,7 @@ export class GameComponent implements OnInit {
 
     if (player.playerTotal > 21 || player.playerTotal == 21) {
       player.busted = true;
+      this.findNext();
     }
 
     this.whoWon();
@@ -94,12 +108,14 @@ export class GameComponent implements OnInit {
       }
     }
     if (allBusted) {
-      if (this.dealerTotal > 21 || this.dealerTotal < this.playerTotal || this.playerTotal == 21) {
-        this.winner = "Player Wins"
-      } else if (this.dealerTotal == this.playerTotal) {
-        this.winner = "Nobody Wins - Push"
-      } else {
-        this.winner = "Dealer Wins"
+      for (let i = 0; i < this.players.length; i++) {
+        if (this.dealerTotal > 21 || (this.dealerTotal < this.players[i].playerTotal && this.players[i].playerTotal < 22) || this.players[i].playerTotal == 21) {
+          this.players[i].winner = "Player Wins"
+        } else if (this.dealerTotal == this.players[i].playerTotal) {
+          this.players[i].winner = "Nobody Wins - Push"
+        } else {
+          this.players[i].winner = "Dealer Wins"
+        }
       }
 
       this.gameOver = true;
@@ -108,6 +124,7 @@ export class GameComponent implements OnInit {
 
   stay(player) {
     player.busted = true;
+    this.findNext();
     this.dealerTotal = 0;
     for (let i = 0; i < this.dealerHand.length; i++) {
       this.dealerTotal += this.dealerHand[i].value;
@@ -129,7 +146,7 @@ export class GameComponent implements OnInit {
     this.dealerTotal = 0;
     this.playerTotal = 0;
     this.players[0].busted = false;
-    // this.busted = false;
+    this.players[0].isUp = true;
 
     if (this.deck.length < 20) {
       for (let i = 0; i < this.deck.length; i++) {
