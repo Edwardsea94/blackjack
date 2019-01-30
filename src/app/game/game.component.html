@@ -1,18 +1,14 @@
 <div *ngIf="!dealerHand.length">
   <button class="deal" (click)="deal()">Start Deal</button>
 </div>
-
-Cards left: {{deck.length}}<br/><br/>
-
-
 <div *ngIf="dealerHand.length">
   Dealer: {{dealerTotal}}<br/>
 
-  <div *ngIf="!busted">
+  <div *ngIf="!players[players.length - 1].busted">
     <!--{{dealerHand[1].id}} of {{dealerHand[1].suit}}<br/>-->
     <img width="4%" src={{dealerHand[1].image}}/>
   </div>
-  <div *ngIf="busted">
+  <div *ngIf="players[players.length - 1].busted">
     <div *ngFor='let card of dealerHand' style="display: inline">
       <!--{{card.id}} of {{card.suit}}<br/>-->
       <img width="4%" src={{card.image}}/>
@@ -22,24 +18,26 @@ Cards left: {{deck.length}}<br/><br/>
 
 <br/>
 
-<div *ngIf="playerHand.length">
-  Player: {{playerTotal}}<br/>
+<div *ngFor="let player of players; trackBy: updatePlayers">
+  <div *ngIf="player.length">
+    Player: {{player.playerTotal}}<br/>
 
-  <div *ngFor='let card of playerHand' style="display: inline;">
-    <!--{{card.id}} of {{card.suit}}<br/>-->
-    <img width="4%" src={{card.image}}>
+    <div *ngFor='let card of player' style="display: inline;">
+      <img width="4%" src={{card.image}}>
+    </div>
+  <!--</div>-->
+<br/>
+  <!--<div *ngIf="player.length">-->
+    <button [disabled]="player.busted" (click)="hit(player)">Hit</button>
+    <button [disabled]="player.busted" (click)="stay(player)">Stay</button>
+    <button [disabled]="player[0].value != player[1].value" (click)="split(player)">Split</button>
   </div>
 </div>
 
-<div *ngIf="playerHand.length">
-  <button [disabled]="busted" (click)="hit()">Hit</button>
-  <button [disabled]="busted" (click)="stay()">Stay</button>
-</div>
-
-<br/><br/>
+<br/>
 
 <div *ngIf="gameOver">
-  Winner is the {{winner}}<br/>
+  {{winner}}<br/>
   <button (click)="redeal()">Play Again</button>
 </div>
 
